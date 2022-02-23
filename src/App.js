@@ -7,9 +7,10 @@ import data from "./data.json";
 class App extends React.Component {
   constructor() {
     super();
+    const cartItems = localStorage.getItem("cartItems");
     this.state = {
       products: data.products,
-      cartItems: [],
+      cartItems: cartItems ? JSON.parse(cartItems) : [],
       size: "",
       sort: "",
     };
@@ -63,14 +64,19 @@ class App extends React.Component {
     if (!alreadyInCart) {
       cartItems.push({ ...product, count: 1 });
     }
-    this.setState({cartItems: cartItems});
+    this.setState({ cartItems: cartItems });
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
   };
 
   removeFromCart = (product) => {
-    const cartItems = this.state.cartItems;
-    this.setState({cartItems: cartItems.filter(x => x._id !== product._id)});
-  } 
-
+    const cartItems = this.state.cartItems.slice();
+    let newCartItems = cartItems.filter((x) => x._id !== product._id);
+    this.setState({ cartItems: newCartItems });
+    localStorage.setItem("cartItems", JSON.stringify(newCartItems));
+  };
+  createOrder = (order) => {
+    alert("need to save order for " + order.name);
+  };
   render() {
     return (
       <div className={"grid-container"}>
@@ -87,11 +93,18 @@ class App extends React.Component {
                 filterProducts={this.filterProducts}
                 sortProducts={this.sortProducts}
               ></Filter>
-              <Products addToCart={this.addToCart} products={this.state.products}></Products>
+              <Products
+                addToCart={this.addToCart}
+                products={this.state.products}
+              ></Products>
             </div>
             <div className="sidebar">
               {" "}
-              <Cart cartItems={this.state.cartItems} removeFromCart={this.removeFromCart}></Cart>
+              <Cart
+                cartItems={this.state.cartItems}
+                removeFromCart={this.removeFromCart}
+                createOrder={this.createOrder}
+              ></Cart>
             </div>
           </div>
         </main>
